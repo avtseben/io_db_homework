@@ -1,11 +1,5 @@
 import java.util.Scanner;
-/*import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-*/import java.io.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.sql.*;
 
@@ -47,11 +41,11 @@ public class MainClass {
 	    switch(queryType) {
 		case 1:
 		    prt("Which category you want to see?");
-		    queryByCategory(c,1,sc1.nextLine());
+		    queryByParameter(c,1,sc1.nextLine());
 		    break;
 		case 2:	
 		    prt("Which Brand you intersted?");
-		    queryByCategory(c,2,sc1.nextLine());
+		    queryByParameter(c,2,sc1.nextLine());
 		    break;
 		default :	
 		    prt("Goobye! Nice to see you!");
@@ -98,7 +92,7 @@ public class MainClass {
 	    String _c = pr.getCateg();
 	    String b = pr.getBrand();
 	    int p = pr.getPrice();
-	    int id = queryByProduct(stmt,_c,b);
+	    int id = queryByParameter(stmt,_c,b);
 	    String sql = "";
 	    if(id == 0) {
 		sql = "INSERT INTO Price (ProdGroup,Brand,Price) VALUES ('" + _c + "','"+ b + "','" + p + "');";
@@ -114,7 +108,7 @@ public class MainClass {
 
 	}
     }
-    public static void queryByCategory(Connection _c, int qType, String _param) {
+    public static void queryByParameter(Connection _c, int qType, String _param) {
 	String query = "";
 	switch(qType) {
 	    case 1: 
@@ -145,7 +139,7 @@ public class MainClass {
 	    System.out.println("SQL запрос по продукту не прошел!!");
 	}
     }
-    public static int queryByProduct(Statement stmt, String _categ, String _brand) {
+    public static int queryByParameter(Statement stmt, String _categ, String _brand) {
 	try {
 	    String sql= "SELECT ID FROM Price where ProdGroup ='" + _categ + "' AND Brand ='" + _brand + "';";//TODO в поле Brand перед названием попадается пробле
 	    ResultSet rs = stmt.executeQuery(sql);
@@ -160,29 +154,4 @@ public class MainClass {
 	}
 	return 0;
     }
-    public static void queryAll(Statement stmt, String sql) {
-	try {
-	    ResultSet rs = stmt.executeQuery(sql);
-	    while ( rs.next() ) {
-		String id  = rs.getString("ID");
-		String categ = rs.getString("ProdGroup");
-		String brand = rs.getString("Brand");
-		String price  = rs.getString("Price");
-		System.out.println( "ID = " + id );
-		System.out.println( "CATEG = " + categ );
-		System.out.println( "BRAND = " + brand );
-		System.out.println( "PRICE = " + price );
-		System.out.println();
-	    }
-	    rs.close();
-	} catch (Exception e) {
-	    System.out.println(e);
-	    System.out.println("SQL запрос не прошел!!");
-	}
-    }
-//    public static void fromListToDB(ArrayList<Product> ap) {
-//	String sql = "INSERT INTO Price (ProdGroup,Brand,Price) VALUES ('test','test','400');"
-//	stmt.executeUpdate(sql);
-//	
-  //  }
 }
