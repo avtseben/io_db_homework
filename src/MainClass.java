@@ -41,11 +41,13 @@ public class MainClass {
 	    switch(queryType) {
 		case 1:
 		    prt("Which category you want to see?");
-		    queryByParameter(c,1,sc1.nextLine());
+		    queryAllVariants(stmt,queryType);
+		    queryByParameter(c,queryType,sc1.nextLine());
 		    break;
 		case 2:	
 		    prt("Which Brand you intersted?");
-		    queryByParameter(c,2,sc1.nextLine());
+		    queryAllVariants(stmt,queryType);
+		    queryByParameter(c,queryType,sc1.nextLine());
 		    break;
 		default :	
 		    prt("Goobye! Nice to see you!");
@@ -133,6 +135,29 @@ public class MainClass {
 		prt("");
 	    }
 	    ps.close();
+	    rs.close();
+	} catch (Exception e) {
+	    System.out.println(e);
+	    System.out.println("SQL запрос по продукту не прошел!!");
+	}
+    }
+    public static void queryAllVariants(Statement stmt, int qType) {
+	String query = "";
+	switch(qType) {
+	    case 1:
+	    query = "SELECT DISTINCT ProdGroup FROM Price;";
+	    break;
+	    case 2:
+	    query = "SELECT DISTINCT Brand FROM Price;";
+	    break;
+	}
+	try {
+	    ResultSet rs = stmt.executeQuery(query);
+	    int n = 0;
+	    while ( rs.next() ) {
+		String param  = rs.getString(1);
+		prt(++n + ". " + param);
+	    }
 	    rs.close();
 	} catch (Exception e) {
 	    System.out.println(e);
