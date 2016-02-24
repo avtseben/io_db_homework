@@ -1,10 +1,13 @@
-import java.sql.Connection;
+import java.util.Scanner;
+/*import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.io.*;
+import java.sql.PreparedStatement;
+*/import java.io.*;
 import java.util.ArrayList;
+import java.sql.*;
 
 
 
@@ -19,11 +22,16 @@ import java.util.ArrayList;
         Обсуждение 10
 */
 public class MainClass {
+    public static void prt(String s) {System.out.println(s);}
     public static void main(String[] args) {
-	ArrayList<Product> a = fromTextToList(); 
 	Connection c = null;
         Statement stmt = null;
+        PreparedStatement pstmt = null;
+	Scanner sc = new Scanner(System.in);
+	Scanner sc1 = new Scanner(System.in);
+	//Pump from text to DB :-)
         try {
+	    ArrayList<Product> a = fromTextToList(); 
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:../assets/Product.db");
             c.setAutoCommit(false);
@@ -32,19 +40,30 @@ public class MainClass {
             stmt.executeUpdate(sql);
 	    fromListToDB(stmt,a);
 
-	    String sqlsel = "SELECT * FROM Price;";
-	    queryAll(stmt,sqlsel);
-
+	    prt("1.Select by category");
+	    prt("2.Select by brand");
+	    prt("");
+	    int queryType = sc.nextInt();
+	    switch(queryType) {
+		case 1:
+		    prt("Which category you want to see?");
+		    queryByCategory(c,1,sc1.nextLine());
+		    break;
+		case 2:	
+		    prt("Which Brand you intersted?");
+		    queryByCategory(c,2,sc1.nextLine());
+		    break;
+		default :	
+		    prt("Goobye! Nice to see you!");
+		    break;
+	    }
             stmt.close();
             c.commit();
             c.close();
-
-
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
     private static Product fromLineToObject(String s) {
 	String [] as = s.split(",");
@@ -81,14 +100,11 @@ public class MainClass {
 	    int p = pr.getPrice();
 	    int id = queryByProduct(stmt,_c,b);
 	    String sql = "";
-	    System.out.println("id = " + id);
 	    if(id == 0) {
 		sql = "INSERT INTO Price (ProdGroup,Brand,Price) VALUES ('" + _c + "','"+ b + "','" + p + "');";
 	    } else {
 		sql = "UPDATE Price SET Price ='" + p + "' WHERE ID = '" + id + "';";
-		System.out.println(sql);
 	    }
-	    //System.out.println(sqlins);
 	    try {
 		stmt.executeUpdate(sql);
 	    } catch (Exception e) {
@@ -96,6 +112,37 @@ public class MainClass {
 	         System.out.println("SQL запись  не удалась!!");
 	    }
 
+	}
+    }
+    public static void queryByCategory(Connection _c, int qType, String _param) {
+	String query = "";
+	switch(qType) {
+	    case 1: 
+	    query = "SELECT ProdGroup, Brand, Price FROM Price WHERE ProdGroup = '" + _param + "';"; 
+	    break;
+	    case 2:
+	    query = "SELECT ProdGroup, Brand, Price FROM Price WHERE Brand = '" + _param + "';"; 
+	    break;
+	}
+	prt("-----------------------------------------------------------");
+	Statement ps = null;
+	try {
+	    ps = _c.createStatement();
+	    ResultSet rs = ps.executeQuery(query);
+	    while ( rs.next() ) {
+		String categ  = rs.getString("ProdGroup");
+		String brand  = rs.getString("Brand");
+		int price  = rs.getInt("Price");
+		prt("Cat = " + categ);
+		prt("Brand = " + brand);
+		prt("Price = " + price);
+		prt("");
+	    }
+	    ps.close();
+	    rs.close();
+	} catch (Exception e) {
+	    System.out.println(e);
+	    System.out.println("SQL запрос по продукту не прошел!!");
 	}
     }
     public static int queryByProduct(Statement stmt, String _categ, String _brand) {
